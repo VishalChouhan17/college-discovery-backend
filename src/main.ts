@@ -4,31 +4,40 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module.js';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  try {
+    const app = await NestFactory.create(AppModule);
 
-  app.useGlobalPipes(
-    new ValidationPipe({
-      whitelist: true,
-      transform: true,
-      transformOptions: { enableImplicitConversion: true },
-    }),
-  );
+    app.useGlobalPipes(
+      new ValidationPipe({
+        whitelist: true,
+        transform: true,
+        transformOptions: { enableImplicitConversion: true },
+      }),
+    );
 
-  app.enableCors();
+    app.enableCors();
 
-  // Swagger Setup
-  const config = new DocumentBuilder()
-    .setTitle('College Discovery API')
-    .setDescription('API documentation for college discovery, comparison, and rank predictor')
-    .setVersion('1.0')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, document);
-  const port = process.env.PORT || 3000;
-  await app.listen(port);
+    // Swagger Setup
+    const config = new DocumentBuilder()
+      .setTitle('College Discovery API')
+      .setDescription('API documentation for college discovery, comparison, and rank predictor')
+      .setVersion('1.0')
+      .build();
+    const document = SwaggerModule.createDocument(app, config);
+    SwaggerModule.setup('api', app, document);
 
-  console.log(`🚀 Application running on: http://localhost:${port}`);
-  console.log(`📚 Swagger Docs available at: http://localhost:${port}/api`);
+    // Use PORT from environment variable (Render sets this)
+    const port = process.env.PORT || 3000;
+    await app.listen(port);
+    
+    console.log(`✅ Application running on: http://localhost:${port}`);
+    console.log(`📚 Swagger Docs available at: http://localhost:${port}/api`);
+    console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'NOT CONFIGURED - Set DATABASE_URL env var'}`);
+  } catch (error) {
+    console.error('❌ Application failed to start:', error.message);
+    console.error('Error details:', error);
+    process.exit(1);
+  }
 }
+
 bootstrap();
