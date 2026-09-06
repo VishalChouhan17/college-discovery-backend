@@ -33,9 +33,12 @@ async function bootstrap() {
     console.log(`✅ Application running on: http://localhost:${port}`);
     console.log(`📚 Swagger Docs available at: http://localhost:${port}/api`);
     console.log(`🗄️  Database: ${process.env.DATABASE_URL ? 'Connected' : 'NOT CONFIGURED - Set DATABASE_URL env var'}`);
-  } catch (error) {
-    console.error('❌ Application failed to start:', error.message);
-    console.error('Error details:', error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    console.error('❌ Application failed to start:', errorMessage);
+    if (error instanceof Error) {
+      console.error('Stack trace:', error.stack);
+    }
     process.exit(1);
   }
 }
