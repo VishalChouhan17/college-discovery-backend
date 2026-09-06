@@ -1,0 +1,151 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum DegreeType {
+  BACHELORS
+  MASTERS
+  DIPLOMA
+}
+
+model College {
+  id           String @id @default(uuid())
+  name         String
+  slug         String @unique
+  city         String
+  state        String
+  nirfRank     Int?
+  avgRating    Float  @default(0.0)
+  totalReviews Int    @default(0)
+
+  courses    Course[]
+  placements Placement[]
+  reviews    Review[]
+  savedBy    SavedCollege[] // <-- ADD THIS INVERSE RELATION FIELD
+
+  @@index([city, state])
+  @@index([nirfRank])
+  @@index([avgRating])
+}
+
+model Course {
+  id         String     @id @default(uuid())
+  title      String // e.g., Computer Science and Engineering
+  type       DegreeType
+  duration   Float // In years (e.g., 4)
+  tuitionFee Float // Total or annual fee
+
+  collegeId String
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  cutoffs Cutoff[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([title])
+  @@index([tuitionFee])
+}
+
+model Cutoff {
+  id          String @id @default(uuid())
+  examName    String // e.g., JEE Main, GATE, CAT
+  year        Int
+  category    String // e.g., General, OBC, SC, ST
+  openingRank Int
+  closingRank Int
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([examName, category])
+  @@index([openingRank, closingRank])
+}
+
+model Placement {
+  id             String @id @default(uuid())
+  year           Int
+  highestPackage Float // In LPA
+  avgPackage     Float // In LPA
+  medianPackage  Float? // In LPA
+  placementRate  Float // Percentage (e.g. 92.5)
+
+  collegeId String
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id      String @id @default(uuid())
+  author  String
+  rating  Int // 1 to 5
+  comment String @db.Text
+
+  collegeId String
+  college   College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id        String   @id @default(uuid())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+
+  // Saved Items Relations
+  savedColleges    SavedCollege[]
+  savedComparisons SavedComparison[]
+
+  // Q&A Relations
+  questions Question[]
+  answers   Answer[]
+}
+
+model SavedCollege {
+  id        String   @id @default(uuid())
+  userId    String
+  collegeId String
+  createdAt DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  college College @relation(fields: [collegeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, collegeId])
+}
+
+model SavedComparison {
+  id         String   @id @default(uuid())
+  userId     String
+  collegeIds String[] // Array of UUIDs compared
+  title      String?
+  createdAt  DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Question {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  userId    String
+  createdAt DateTime @default(now())
+
+  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  answers Answer[]
+}
+
+model Answer {
+  id         String   @id @default(uuid())
+  content    String
+  questionId String
+  userId     String
+  createdAt  DateTime @default(now())
+
+  question Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
