@@ -18,6 +18,7 @@ model College {
   slug         String @unique
   city         String
   state        String
+  logo         String?
   nirfRank     Int?
   avgRating    Float  @default(0.0)
   totalReviews Int    @default(0)
