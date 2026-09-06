@@ -1,4 +1,5 @@
 import { Controller, Post, Get, Delete, Body, Param, UseGuards, Request } from '@nestjs/common';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { SavedService } from './saved.service.js';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard.js';
 import { SaveCollegeDto, SaveComparisonDto } from './dto/saved.dto.js';
@@ -11,7 +12,8 @@ interface AuthenticatedRequest extends Request {
     name: string;
   };
 }
-
+@ApiTags('Saved Items')
+@ApiBearerAuth() 
 @UseGuards(JwtAuthGuard)
 @Controller('saved')
 export class SavedController {
