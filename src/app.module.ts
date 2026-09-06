@@ -6,6 +6,8 @@ import { PredictorModule } from './predictor/predictor.module.js';
 import { AuthModule } from './auth/auth.module.js';
 import { SavedModule } from './saved/saved.module.js';
 import { QuestionsModule } from './questions/questions.module.js';
+import { AppController } from './app.controller.js';
+
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }), // Loads .env globally
@@ -16,5 +18,6 @@ import { QuestionsModule } from './questions/questions.module.js';
     SavedModule,
     QuestionsModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
